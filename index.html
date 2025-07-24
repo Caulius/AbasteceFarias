@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="description" content="Sistema completo para gerenciar abastecimentos de veículos com DIESEL e ARLA" />
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Abastecimento" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/pwa-512x512.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/pwa-512x512.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/pwa-512x512.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <title>Sistema de Gestão de Abastecimento</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registrado com sucesso:', registration);
+              
+              // Verificar atualizações
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      // Nova versão disponível
+                      if (confirm('🚀 Nova versão do app disponível! Deseja atualizar agora?')) {
+                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        window.location.reload();
+                      }
+                    }
+                  });
+                }
+              });
+            })
+            .catch((error) => {
+              console.log('Erro ao registrar SW:', error);
+            });
+          
+          // Verificar se pode solicitar permissão para notificações
+          if ('Notification' in window && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(() => {
+              if (Notification.permission === 'default') {
+                // Aguardar um pouco antes de solicitar permissão
+                setTimeout(() => {
+                  Notification.requestPermission().then((permission) => {
+                    console.log('Permissão de notificação:', permission);
+                  });
+                }, 5000); // 5 segundos após carregar
+              }
+            });
+          }
+        });
+      }
+      
+      // Detectar quando o app é instalado
+      window.addEventListener('appinstalled', (event) => {
+        console.log('PWA foi instalado com sucesso!');
+        // Opcional: mostrar uma mensagem de boas-vindas
+        setTimeout(() => {
+          alert('🎉 App instalado com sucesso! Agora você pode acessá-lo diretamente da sua tela inicial.');
+        }, 1000);
+      });
+      
+      // Lidar com mudanças de conectividade
+      window.addEventListener('online', () => {
+        console.log('Conexão restaurada');
+        // Opcional: mostrar notificação de volta online
+      });
+      
+      window.addEventListener('offline', () => {
+        console.log('Conexão perdida - modo offline');
+        // Opcional: mostrar notificação de modo offline
+      });
+    </script>
+  </body>
+</html>
