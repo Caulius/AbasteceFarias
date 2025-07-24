@@ -19,9 +19,6 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 ano
-              },
-              cacheKeyWillBeUsed: async ({ request }) => {
-                return `${request.url}?${Date.now()}`;
               }
             }
           }
@@ -52,24 +49,5 @@ export default defineConfig({
         ]
       }
     })
-  ],
-  server: {
-    host: true, // Permite acesso via rede local
-    port: 5173
-  },
-  build: {
-    // Otimizações para PWA
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          firebase: ['firebase/app', 'firebase/firestore'],
-          utils: ['jspdf', 'xlsx']
-        }
-      }
-    }
-  },
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-  },
+  ]
 });
