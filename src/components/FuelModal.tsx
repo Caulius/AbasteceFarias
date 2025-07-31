@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Fuel, User, Car, Calendar, Gauge, Route, Calculator, FileText } from 'lucide-react';
+import { X, Fuel, User, Car, Calendar, Gauge, Route, Calculator, FileText, CheckCircle, Clock } from 'lucide-react';
 import type { FuelRecord, Responsible, Vehicle } from '../types';
 
 interface FuelModalProps {
@@ -64,6 +64,32 @@ const FuelModal: React.FC<FuelModalProps> = ({ record, responsible, vehicle, isO
               </p>
             </div>
 
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <h3 className="text-lg font-medium text-white mb-3 flex items-center">
+                {record.status === 'CONCLUIDO' ? (
+                  <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
+                ) : (
+                  <Clock className="h-5 w-5 mr-2 text-yellow-500" />
+                )}
+                Status
+              </h3>
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                record.status === 'CONCLUIDO'
+                  ? 'bg-green-900/30 text-green-400 border border-green-600/30'
+                  : 'bg-yellow-900/30 text-yellow-400 border border-yellow-600/30'
+              }`}>
+                {record.status === 'CONCLUIDO' ? (
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                ) : (
+                  <Clock className="h-4 w-4 mr-1" />
+                )}
+                {record.status}
+              </span>
+            </div>
+          </div>
+
+          {/* Tipos de Combustível */}
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
             <div className="bg-gray-700 p-4 rounded-lg">
               <h3 className="text-lg font-medium text-white mb-3 flex items-center">
                 <Fuel className="h-5 w-5 mr-2 text-blue-500" />
