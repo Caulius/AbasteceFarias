@@ -138,6 +138,21 @@ const Dashboard: React.FC<DashboardProps> = ({ fuelRecords, responsibles, vehicl
 
   const { totalDieselRefueled, totalArlaRefueled } = getTotalRefueled();
 
+  // Calcular totais abastecidos gerais (todos os registros)
+  const getTotalRefueledGeneral = () => {
+    const totalDieselRefueled = fuelRecords.reduce((sum, record) => {
+      return sum + (record.dieselTotalRefueled || 0);
+    }, 0);
+    
+    const totalArlaRefueled = fuelRecords.reduce((sum, record) => {
+      return sum + (record.arlaTotalRefueled || 0);
+    }, 0);
+    
+    return { totalDieselRefueled, totalArlaRefueled };
+  };
+
+  const { totalDieselRefueled: totalDieselRefueledGeneral, totalArlaRefueled: totalArlaRefueledGeneral } = getTotalRefueledGeneral();
+
   // Calcular média de consumo filtrada por período
   const getFilteredConsumption = (vehicleId: string) => {
     if (vehicleId === 'all') {
@@ -208,14 +223,14 @@ const Dashboard: React.FC<DashboardProps> = ({ fuelRecords, responsibles, vehicl
     },
     {
       title: 'Total Abastecido DIESEL',
-      value: totalDieselRefueled.toFixed(1) + 'L',
+      value: totalDieselRefueledGeneral.toFixed(1) + 'L',
       icon: Fuel,
       color: 'bg-orange-700',
       bgColor: 'bg-gray-800'
     },
     {
       title: 'Total Abastecido ARLA',
-      value: totalArlaRefueled.toFixed(1) + 'L',
+      value: totalArlaRefueledGeneral.toFixed(1) + 'L',
       icon: Fuel,
       color: 'bg-green-700',
       bgColor: 'bg-gray-800'
