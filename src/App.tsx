@@ -95,7 +95,12 @@ function App() {
     try {
       if (editingRecord) {
         // Editando registro existente
-        await updateFuelRecord(editingRecord.id, recordData);
+        // Preservar a data original ao editar
+        const updateData = {
+          ...recordData,
+          date: editingRecord.date // Manter a data original
+        };
+        await updateFuelRecord(editingRecord.id, updateData);
         setEditingRecord(null);
         alert('Abastecimento atualizado com sucesso!');
       } else {
