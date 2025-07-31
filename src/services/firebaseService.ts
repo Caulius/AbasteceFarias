@@ -28,6 +28,15 @@ const convertTimestamp = (timestamp: any): Date => {
   return new Date(timestamp);
 };
 
+// Utilitário para migrar registros existentes adicionando status
+const migrateRecordStatus = (record: any): any => {
+  // Se o registro não tem status, adicionar como PENDENTE
+  if (!record.status) {
+    return { ...record, status: 'PENDENTE' };
+  }
+  return record;
+};
+
 // Serviços para Responsáveis
 export const responsibleService = {
   // Adicionar responsável
@@ -163,7 +172,7 @@ export const fuelRecordService = {
       
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        ...migrateRecordStatus(doc.data()),
         date: convertTimestamp(doc.data().date),
         createdAt: convertTimestamp(doc.data().createdAt)
       })) as FuelRecord[];
@@ -186,7 +195,7 @@ export const fuelRecordService = {
       
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        ...migrateRecordStatus(doc.data()),
         date: convertTimestamp(doc.data().date),
         createdAt: convertTimestamp(doc.data().createdAt)
       })) as FuelRecord[];
@@ -208,7 +217,7 @@ export const fuelRecordService = {
       
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        ...migrateRecordStatus(doc.data()),
         date: convertTimestamp(doc.data().date),
         createdAt: convertTimestamp(doc.data().createdAt)
       })) as FuelRecord[];
