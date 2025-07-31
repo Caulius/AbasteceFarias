@@ -292,7 +292,16 @@ export const useOfflineFuelRecords = () => {
         const offlineData = getOfflineData();
         const index = offlineData.fuelRecords.findIndex(r => r.id === id);
         if (index !== -1) {
-          offlineData.fuelRecords[index] = { ...offlineData.fuelRecords[index], ...record };
+          // Preservar campos importantes ao fazer update offline
+          const originalRecord = offlineData.fuelRecords[index];
+          offlineData.fuelRecords[index] = { 
+            ...originalRecord, 
+            ...record,
+            // Preservar data original se não foi explicitamente alterada
+            date: record.date || originalRecord.date,
+            // Preservar createdAt original
+            createdAt: originalRecord.createdAt
+          };
           saveOfflineData(offlineData);
           setFuelRecords(offlineData.fuelRecords);
         }
