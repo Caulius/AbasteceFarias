@@ -229,6 +229,9 @@ export const fuelRecordService = {
         updateData.date = Timestamp.fromDate(new Date(updateData.date)) as any;
       }
       
+      // Não atualizar createdAt em updates
+      delete updateData.createdAt;
+      
       await updateDoc(docRef, updateData);
     } catch (error) {
       console.error('Erro ao atualizar registro de combustível:', error);
