@@ -18,6 +18,7 @@ export interface FuelRecord {
   responsibleId: string;
   vehicleId: string;
   fuelTypes: ('DIESEL' | 'ARLA')[];
+  status: 'PENDENTE' | 'CONCLUIDO';
   dieselOdometerStart?: number;
   dieselOdometerEnd?: number;
   dieselLevelStart?: number;
