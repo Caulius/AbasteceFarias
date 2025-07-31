@@ -114,6 +114,7 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
           responsible?.name || 'N/A',
           `${vehicle?.plate} - ${vehicle?.model}`,
           record.fuelTypes.join(', '),
+          record.status,
           record.dieselDailyStart || record.dieselDailyEnd ? 
             `${record.dieselDailyStart || 0}L → ${record.dieselDailyEnd || 0}L` : '-',
           record.arlaDailyStart || record.arlaDailyEnd ? 
@@ -127,7 +128,7 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
       });
 
       autoTable(doc, {
-        head: [['Data/Hora', 'Responsável', 'Veículo', 'Tipos', 'DIESEL Diário', 'ARLA Diário', 'Abastecido', 'KM', 'Média', 'Média Painel', 'Observações']],
+        head: [['Data/Hora', 'Responsável', 'Veículo', 'Tipos', 'Status', 'DIESEL Diário', 'ARLA Diário', 'Abastecido', 'KM', 'Média', 'Média Painel', 'Observações']],
         body: tableData,
         startY: 87,
         styles: { fontSize: 8 },
@@ -197,7 +198,7 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
     const detailsData = [
       [
         'Data', 'Hora', 'Responsável', 'Telefone', 'Veículo', 'Placa', 'Modelo',
-        'Tipos Combustível', 
+        'Tipos Combustível', 'Status',
         'DIESEL - Hodômetro Inicial', 'DIESEL - Hodômetro Final',
         'DIESEL - Nível Inicial', 'DIESEL - Nível Final',
         'DIESEL - Total Início Dia (L)', 'DIESEL - Total Final Dia (L)',
@@ -238,6 +239,7 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
         vehicle?.model || '',
         // Tipos de combustível
         record.fuelTypes.join(', '),
+        record.status,
         // DIESEL - Dados completos
         record.dieselOdometerStart || '',
         record.dieselOdometerEnd || '',
