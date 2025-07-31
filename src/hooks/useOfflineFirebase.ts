@@ -267,7 +267,8 @@ export const useOfflineFuelRecords = () => {
         const newRecord: FuelRecord = {
           ...record,
           id: `offline_${Date.now()}_${Math.random()}`,
-          createdAt: new Date()
+          createdAt: new Date(),
+          status: record.status || 'PENDENTE' // Garantir que sempre tenha status
         };
         
         const offlineData = getOfflineData();
@@ -300,7 +301,9 @@ export const useOfflineFuelRecords = () => {
             // Preservar data original se não foi explicitamente alterada
             date: record.date || originalRecord.date,
             // Preservar createdAt original
-            createdAt: originalRecord.createdAt
+            createdAt: originalRecord.createdAt,
+            // Garantir que sempre tenha status
+            status: record.status || originalRecord.status || 'PENDENTE'
           };
           saveOfflineData(offlineData);
           setFuelRecords(offlineData.fuelRecords);
