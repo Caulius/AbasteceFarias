@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Eye, Edit, Trash2, Fuel, Calendar, User, Car, Filter } from 'lucide-react';
+import { Search, Eye, Edit, Trash2, Fuel, Calendar, User, Car, Filter, CheckCircle, Clock } from 'lucide-react';
 import type { FuelRecord, Responsible, Vehicle } from '../types';
 
 interface FuelListProps {
@@ -9,6 +9,7 @@ interface FuelListProps {
   onEdit: (record: FuelRecord) => void;
   onDelete: (id: string) => void;
   onView: (record: FuelRecord) => void;
+  onUpdateStatus: (id: string, status: 'PENDENTE' | 'CONCLUIDO') => void;
   highlightedRecordId?: string;
 }
 
@@ -19,6 +20,7 @@ const FuelList: React.FC<FuelListProps> = ({
   onEdit, 
   onDelete, 
   onView,
+  onUpdateStatus,
   highlightedRecordId 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -242,9 +244,44 @@ const FuelList: React.FC<FuelListProps> = ({
                         "{record.observations}"
                       </p>
                     )}
+                    
+                    {/* Status Badge */}
+                    <div className="mt-3">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        record.status === 'CONCLUIDO'
+                          ? 'bg-green-900/30 text-green-400 border border-green-600/30'
+                          : 'bg-yellow-900/30 text-yellow-400 border border-yellow-600/30'
+                      }`}>
+                        {record.status === 'CONCLUIDO' ? (
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                        ) : (
+                          <Clock className="h-3 w-3 mr-1" />
+                        )}
+                        {record.status}
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="flex items-center space-x-2 ml-4">
+                    {/* Botão de Status */}
+                    {record.status === 'PENDENTE' && (
+                      <button
+                        onClick={() => onUpdateStatus(record.id, 'CONCLUIDO')}
+                        className="p-2 text-green-400 hover:bg-green-600/20 rounded-lg transition-colors"
+                        title="Marcar como concluído"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </button>
+                    )}
+                    {record.status === 'CONCLUIDO' && (
+                      <button
+                        onClick={() => onUpdateStatus(record.id, 'PENDENTE')}
+                        className="p-2 text-yellow-400 hover:bg-yellow-600/20 rounded-lg transition-colors"
+                        title="Marcar como pendente"
+                      >
+                        <Clock className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => onView(record)}
                       className="p-2 text-blue-400 hover:bg-blue-600/20 rounded-lg transition-colors"
