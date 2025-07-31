@@ -236,6 +236,7 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         responsibleId: formData.responsibleId,
         vehicleId: formData.vehicleId,
         fuelTypes: formData.fuelTypes,
+        status: 'PENDENTE' as const,
         // Campos DIESEL
         ...(isDieselSelected && formData.dieselOdometerStart && { dieselOdometerStart: Number(formData.dieselOdometerStart) }),
         ...(isDieselSelected && formData.dieselOdometerEnd && { dieselOdometerEnd: Number(formData.dieselOdometerEnd) }),
