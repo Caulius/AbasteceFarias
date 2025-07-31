@@ -98,7 +98,8 @@ function App() {
         // Preservar a data original ao editar
         const updateData = {
           ...recordData,
-          date: editingRecord.date // Manter a data original
+          date: editingRecord.date, // Manter a data original
+          status: editingRecord.status // Manter o status original ao editar
         };
         await updateFuelRecord(editingRecord.id, updateData);
         setEditingRecord(null);
@@ -126,6 +127,15 @@ function App() {
       } catch (error) {
         alert('Erro ao excluir abastecimento. Tente novamente.');
       }
+    }
+  };
+
+  const handleUpdateFuelRecordStatus = async (id: string, status: 'PENDENTE' | 'CONCLUIDO') => {
+    try {
+      await updateFuelRecord(id, { status });
+      // Não mostrar alert para mudança de status, é uma ação rápida
+    } catch (error) {
+      alert('Erro ao atualizar status. Tente novamente.');
     }
   };
 
@@ -241,6 +251,7 @@ function App() {
             onEdit={editFuelRecord}
             onDelete={handleDeleteFuelRecord}
             onView={viewFuelRecord}
+            onUpdateStatus={handleUpdateFuelRecordStatus}
             highlightedRecordId={highlightedRecordId}
           />
         );
