@@ -163,12 +163,118 @@ const FuelList: React.FC<FuelListProps> = ({
             <h3 className="text-lg font-semibold text-white">
               Abastecimentos ({totalRecords})
             </h3>
-            {totalPages > 1 && (
-              <div className="text-sm text-gray-400">
-                Página {currentPage} de {totalPages}
-              </div>
-            )}
           </div>
+          
+          {/* Controles de Paginação Superior */}
+          {totalPages > 1 && (
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-400">
+                  Mostrando {startIndex + 1} a {Math.min(endIndex, totalRecords)} de {totalRecords} abastecimentos
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  {/* Botão Anterior */}
+                  <button
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === 1
+                        ? 'text-gray-500 cursor-not-allowed'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                    }`}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Anterior
+                  </button>
+
+                  {/* Números das páginas */}
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const pages = [];
+                      const maxVisiblePages = 5;
+                      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                      
+                      // Ajustar startPage se endPage for menor que maxVisiblePages
+                      if (endPage - startPage + 1 < maxVisiblePages) {
+                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                      }
+
+                      // Primeira página
+                      if (startPage > 1) {
+                        pages.push(
+                          <button
+                            key={1}
+                            onClick={() => goToPage(1)}
+                            className="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                          >
+                            1
+                          </button>
+                        );
+                        if (startPage > 2) {
+                          pages.push(
+                            <span key="ellipsis1" className="px-2 text-gray-500">...</span>
+                          );
+                        }
+                      }
+
+                      // Páginas visíveis
+                      for (let i = startPage; i <= endPage; i++) {
+                        pages.push(
+                          <button
+                            key={i}
+                            onClick={() => goToPage(i)}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              i === currentPage
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                            }`}
+                          >
+                            {i}
+                          </button>
+                        );
+                      }
+
+                      // Última página
+                      if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                          pages.push(
+                            <span key="ellipsis2" className="px-2 text-gray-500">...</span>
+                          );
+                        }
+                        pages.push(
+                          <button
+                            key={totalPages}
+                            onClick={() => goToPage(totalPages)}
+                            className="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+                          >
+                            {totalPages}
+                          </button>
+                        );
+                      }
+
+                      return pages;
+                    })()}
+                  </div>
+
+                  {/* Botão Próximo */}
+                  <button
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === totalPages
+                        ? 'text-gray-500 cursor-not-allowed'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                    }`}
+                  >
+                    Próximo
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         
         {totalRecords === 0 ? (
