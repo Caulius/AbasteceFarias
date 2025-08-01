@@ -25,7 +25,12 @@ const FuelList: React.FC<FuelListProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'DIESEL' | 'ARLA'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'PENDENTE' | 'CONCLUIDO'>('PENDENTE');
+  const [filterDateType, setFilterDateType] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'vehicle' | 'responsible'>('date');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 30;
 
@@ -43,23 +48,64 @@ const FuelList: React.FC<FuelListProps> = ({
         filterType === 'all' || 
         record.fuelTypes.includes(filterType as 'DIESEL' | 'ARLA');
       
-      return matchesSearch && matchesFilter;
+      const matchesStatus = 
+        filterStatus === 'all' || 
+        record.status === filterStatus;
+      
+      // Filtro por data
+      let matchesDate = true;
+      const recordDate = new Date(record.date);
+      const now = new Date();
+      
+      switch (filterDateType) {
+        case 'today':
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const recordDay = new Date(recordDate.getFullYear(), recordDate.getMonth(), recordDate.getDate());
+          matchesDate = recordDay.getTime() === today.getTime();
+          break;
+        case 'week':
+          const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+          matchesDate = recordDate >= weekAgo;
+          break;
+        case 'month':
+          const monthAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+          matchesDate = recordDate >= monthAgo;
+          break;
+        case 'custom':
+          if (customStartDate && customEndDate) {
+            const startDate = new Date(customStartDate);
+            const endDate = new Date(customEndDate + 'T23:59:59');
+            matchesDate = recordDate >= startDate && recordDate <= endDate;
+          }
+          break;
+        default:
+          matchesDate = true;
+      }
+      
+      return matchesSearch && matchesFilter && matchesStatus && matchesDate;
     })
     .sort((a, b) => {
+      let comparison = 0;
+      
       switch (sortBy) {
         case 'date':
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+          comparison = new Date(b.date).getTime() - new Date(a.date).getTime();
+          break;
         case 'vehicle':
           const vehicleA = vehicles.find(v => v.id === a.vehicleId);
           const vehicleB = vehicles.find(v => v.id === b.vehicleId);
-          return (vehicleA?.plate || '').localeCompare(vehicleB?.plate || '');
+          comparison = (vehicleA?.plate || '').localeCompare(vehicleB?.plate || '');
+          break;
         case 'responsible':
           const respA = responsibles.find(r => r.id === a.responsibleId);
           const respB = responsibles.find(r => r.id === b.responsibleId);
-          return (respA?.name || '').localeCompare(respB?.name || '');
+          comparison = (respA?.name || '').localeCompare(respB?.name || '');
+          break;
         default:
-          return 0;
+          comparison = 0;
       }
+      
+      return sortOrder === 'desc' ? comparison : -comparison;
     });
 
   // Calcular paginação
@@ -72,7 +118,7 @@ const FuelList: React.FC<FuelListProps> = ({
   // Resetar página quando filtros mudarem
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterType, sortBy]);
+  }, [searchTerm, filterType, filterStatus, filterDateType, customStartDate, customEndDate, sortBy, sortOrder]);
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
@@ -108,53 +154,178 @@ const FuelList: React.FC<FuelListProps> = ({
     <div className="space-y-6">
       {/* Filtros e Busca */}
       <div className="bg-gray-800 p-4 sm:p-6 rounded-xl shadow-sm border border-gray-700">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              <Search className="h-4 w-4 inline mr-1" />
-              Buscar
-            </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por responsável, placa ou modelo..."
-              className="w-full px-3 sm:px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400 text-sm sm:text-base"
-            />
+        <div className="space-y-4">
+          {/* Primeira linha - Busca e Status */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                <Search className="h-4 w-4 inline mr-1" />
+                Buscar
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar por responsável, placa ou modelo..."
+                className="w-full px-3 sm:px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400 text-sm sm:text-base"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                <Filter className="h-4 w-4 inline mr-1" />
+                Status
+              </label>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as 'all' | 'PENDENTE' | 'CONCLUIDO')}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+              >
+                <option value="PENDENTE">Pendentes</option>
+                <option value="CONCLUIDO">Concluídos</option>
+                <option value="all">Todos</option>
+              </select>
+            </div>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              <Filter className="h-4 w-4 inline mr-1" />
-              Tipo de Combustível
-            </label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as 'all' | 'DIESEL' | 'ARLA')}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
-            >
-              <option value="all">Todos</option>
-              <option value="DIESEL">DIESEL</option>
-              <option value="ARLA">ARLA</option>
-            </select>
+          {/* Segunda linha - Filtros avançados */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Tipo de Combustível
+              </label>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as 'all' | 'DIESEL' | 'ARLA')}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+              >
+                <option value="all">Todos</option>
+                <option value="DIESEL">DIESEL</option>
+                <option value="ARLA">ARLA</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Período
+              </label>
+              <select
+                value={filterDateType}
+                onChange={(e) => setFilterDateType(e.target.value as any)}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+              >
+                <option value="all">Todos os períodos</option>
+                <option value="today">Hoje</option>
+                <option value="week">Última semana</option>
+                <option value="month">Último mês</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Ordenar por
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'date' | 'vehicle' | 'responsible')}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+              >
+                <option value="date">Data</option>
+                <option value="vehicle">Veículo</option>
+                <option value="responsible">Responsável</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Ordem
+              </label>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'desc' | 'asc')}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+              >
+                <option value="desc">Mais novo primeiro</option>
+                <option value="asc">Mais antigo primeiro</option>
+              </select>
+            </div>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Ordenar por
-            </label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'date' | 'vehicle' | 'responsible')}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
-            >
-              <option value="date">Data</option>
-              <option value="vehicle">Veículo</option>
-              <option value="responsible">Responsável</option>
-            </select>
-          </div>
+          {/* Terceira linha - Datas personalizadas */}
+          {filterDateType === 'custom' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Data Inicial
+                </label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Data Final
+                </label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Resumo dos filtros ativos */}
+      {(filterStatus !== 'all' || filterType !== 'all' || filterDateType !== 'all' || searchTerm) && (
+        <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-600/30">
+          <h4 className="text-blue-400 font-medium mb-2">Filtros Ativos:</h4>
+          <div className="flex flex-wrap gap-2">
+            {filterStatus !== 'all' && (
+              <span className="px-2 py-1 bg-blue-600 text-white rounded-full text-xs">
+                Status: {filterStatus}
+              </span>
+            )}
+            {filterType !== 'all' && (
+              <span className="px-2 py-1 bg-blue-600 text-white rounded-full text-xs">
+                Combustível: {filterType}
+              </span>
+            )}
+            {filterDateType !== 'all' && (
+              <span className="px-2 py-1 bg-blue-600 text-white rounded-full text-xs">
+                Período: {filterDateType === 'today' ? 'Hoje' : 
+                         filterDateType === 'week' ? 'Última semana' :
+                         filterDateType === 'month' ? 'Último mês' : 'Personalizado'}
+              </span>
+            )}
+            {searchTerm && (
+              <span className="px-2 py-1 bg-blue-600 text-white rounded-full text-xs">
+                Busca: "{searchTerm}"
+              </span>
+            )}
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setFilterType('all');
+                setFilterStatus('PENDENTE');
+                setFilterDateType('all');
+                setCustomStartDate('');
+                setCustomEndDate('');
+              }}
+              className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs transition-colors"
+            >
+              Limpar filtros
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Lista de Abastecimentos */}
       <div className="bg-gray-800 rounded-xl shadow-sm border border-gray-700">
@@ -163,6 +334,12 @@ const FuelList: React.FC<FuelListProps> = ({
             <h3 className="text-lg font-semibold text-white">
               Abastecimentos ({totalRecords})
             </h3>
+            {totalRecords > 0 && (
+              <div className="text-sm text-gray-400">
+                Ordenado por {sortBy === 'date' ? 'data' : sortBy === 'vehicle' ? 'veículo' : 'responsável'} 
+                ({sortOrder === 'desc' ? 'mais novo primeiro' : 'mais antigo primeiro'})
+              </div>
+            )}
           </div>
           
           {/* Controles de Paginação Superior */}
