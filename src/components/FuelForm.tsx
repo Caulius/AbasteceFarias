@@ -86,6 +86,32 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
 
   // Calcular média automaticamente
   const calculatedAverage = calculateAverage();
+  
+  // Calcular total da bomba DIESEL automaticamente
+  const calculateDieselPumpTotal = (): number | null => {
+    const start = parseFloat(formData.dieselOdometerStart);
+    const end = parseFloat(formData.dieselOdometerEnd);
+    
+    if (!isNaN(start) && !isNaN(end) && end > start) {
+      return end - start;
+    }
+    return null;
+  };
+  
+  // Calcular total da bomba ARLA automaticamente
+  const calculateArlaPumpTotal = (): number | null => {
+    const start = parseFloat(formData.arlaOdometerStart);
+    const end = parseFloat(formData.arlaOdometerEnd);
+    
+    if (!isNaN(start) && !isNaN(end) && end > start) {
+      return end - start;
+    }
+    return null;
+  };
+  
+  const calculatedDieselPumpTotal = calculateDieselPumpTotal();
+  const calculatedArlaPumpTotal = calculateArlaPumpTotal();
+  
   // Função para autopreencher hodômetros quando o tipo de combustível é selecionado
   const handleFuelTypeChange = (fuelType: 'DIESEL' | 'ARLA') => {
     const isSelected = formData.fuelTypes.includes(fuelType);
@@ -245,6 +271,7 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         ...(isDieselSelected && formData.dieselDailyType === 'start' && formData.dieselDailyStart && { dieselDailyStart: Number(formData.dieselDailyStart) }),
         ...(isDieselSelected && formData.dieselDailyType === 'end' && formData.dieselDailyEnd && { dieselDailyEnd: Number(formData.dieselDailyEnd) }),
         ...(isDieselSelected && formData.dieselTotalRefueled && { dieselTotalRefueled: Number(formData.dieselTotalRefueled) }),
+        ...(isDieselSelected && calculatedDieselPumpTotal !== null && { dieselPumpTotal: Number(calculatedDieselPumpTotal.toFixed(2)) }),
         // Campos ARLA
         ...(isArlaSelected && formData.arlaOdometerStart && { arlaOdometerStart: Number(formData.arlaOdometerStart) }),
         ...(isArlaSelected && formData.arlaOdometerEnd && { arlaOdometerEnd: Number(formData.arlaOdometerEnd) }),
@@ -253,6 +280,7 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         ...(isArlaSelected && formData.arlaDailyType === 'start' && formData.arlaDailyStart && { arlaDailyStart: Number(formData.arlaDailyStart) }),
         ...(isArlaSelected && formData.arlaDailyType === 'end' && formData.arlaDailyEnd && { arlaDailyEnd: Number(formData.arlaDailyEnd) }),
         ...(isArlaSelected && formData.arlaTotalRefueled && { arlaTotalRefueled: Number(formData.arlaTotalRefueled) }),
+        ...(isArlaSelected && calculatedArlaPumpTotal !== null && { arlaPumpTotal: Number(calculatedArlaPumpTotal.toFixed(2)) }),
         // Campos gerais
         ...(formData.vehicleKm && { vehicleKm: Number(formData.vehicleKm) }),
         ...(calculatedAverage !== null && { average: Number(calculatedAverage.toFixed(2)) }),
@@ -576,6 +604,40 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
                 placeholder="Quantidade total abastecida"
               />
             </div>
+            
+            {/* Campo Total Abastecido Bomba (calculado automaticamente) */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Total abastecido Bomba (L)
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={calculatedDieselPumpTotal !== null ? calculatedDieselPumpTotal.toFixed(2) : ''}
+                  readOnly
+                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
+                  placeholder="Calculado automaticamente"
+                />
+                {calculatedDieselPumpTotal === null && formData.dieselOdometerStart && formData.dieselOdometerEnd && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span className="text-yellow-400 text-xs">
+                      Verificar hodômetros
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="mt-1 text-xs text-gray-400">
+                {formData.dieselOdometerStart && formData.dieselOdometerEnd ? (
+                  calculatedDieselPumpTotal !== null ? (
+                    `Cálculo: ${formData.dieselOdometerEnd} - ${formData.dieselOdometerStart} = ${calculatedDieselPumpTotal.toFixed(2)}L`
+                  ) : (
+                    'Hodômetro final deve ser maior que o inicial'
+                  )
+                ) : (
+                  'Preencha os hodômetros inicial e final para calcular automaticamente'
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -734,6 +796,40 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
                 placeholder="Quantidade total abastecida"
               />
+            </div>
+            
+            {/* Campo Total Abastecido Bomba (calculado automaticamente) */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Total abastecido Bomba (L)
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={calculatedArlaPumpTotal !== null ? calculatedArlaPumpTotal.toFixed(2) : ''}
+                  readOnly
+                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
+                  placeholder="Calculado automaticamente"
+                />
+                {calculatedArlaPumpTotal === null && formData.arlaOdometerStart && formData.arlaOdometerEnd && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span className="text-yellow-400 text-xs">
+                      Verificar hodômetros
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="mt-1 text-xs text-gray-400">
+                {formData.arlaOdometerStart && formData.arlaOdometerEnd ? (
+                  calculatedArlaPumpTotal !== null ? (
+                    `Cálculo: ${formData.arlaOdometerEnd} - ${formData.arlaOdometerStart} = ${calculatedArlaPumpTotal.toFixed(2)}L`
+                  ) : (
+                    'Hodômetro final deve ser maior que o inicial'
+                  )
+                ) : (
+                  'Preencha os hodômetros inicial e final para calcular automaticamente'
+                )}
+              </div>
             </div>
           </div>
         </div>
