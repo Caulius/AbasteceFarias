@@ -539,6 +539,11 @@ const FuelList: React.FC<FuelListProps> = ({
                             <div>
                               <span className="text-gray-400">Abastecido:</span>
                               <span className="text-orange-400 font-medium ml-1">{record.dieselTotalRefueled}L</span>
+                              {record.dieselPumpTotal && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Bomba: {record.dieselPumpTotal}L
+                                </div>
+                              )}
                             </div>
                           )}
                           {(record.arlaDailyStart || record.arlaDailyEnd) && (
@@ -555,6 +560,11 @@ const FuelList: React.FC<FuelListProps> = ({
                             <div>
                               <span className="text-gray-400">Abastecido:</span>
                               <span className="text-green-400 font-medium ml-1">{record.arlaTotalRefueled}L</span>
+                              {record.arlaPumpTotal && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Bomba: {record.arlaPumpTotal}L
+                                </div>
+                              )}
                             </div>
                           )}
                           {record.vehicleKm && (
