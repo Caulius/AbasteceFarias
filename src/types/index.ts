@@ -33,6 +33,8 @@ export interface FuelRecord {
   dieselTotalRefueled?: number;
   arlaDailyStart?: number;
   arlaDailyEnd?: number;
+  dieselPumpTotal?: number;
+  arlaPumpTotal?: number;
   vehicleKm?: number;
   average?: number;
   averagePanel?: number;
