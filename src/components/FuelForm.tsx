@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Fuel, Gauge, Route, FileText, Calculator } from 'lucide-react';
 import type { FuelRecord, Responsible, Vehicle } from '../types';
+import { convertCmToVolume, getCmOptions } from '../utils/dieselLevelConverter';
 
 interface FuelFormProps {
   responsibles: Responsible[];
@@ -25,6 +26,8 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
     arlaLevelType: 'none' as 'none' | 'start' | 'end',
     arlaLevelStart: '',
     arlaLevelEnd: '',
+    dieselLevelStartCm: '',
+    dieselLevelEndCm: '',
     dieselDailyType: 'none' as 'none' | 'start' | 'end',
     dieselDailyStart: '',
     dieselDailyEnd: '',
@@ -204,6 +207,8 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         arlaLevelType,
         arlaLevelStart: editingRecord.arlaLevelStart?.toString() || '',
         arlaLevelEnd: editingRecord.arlaLevelEnd?.toString() || '',
+        dieselLevelStartCm: '',
+        dieselLevelEndCm: '',
         dieselDailyType,
         dieselDailyStart: editingRecord.dieselDailyStart?.toString() || '',
         dieselDailyEnd: editingRecord.dieselDailyEnd?.toString() || '',
@@ -300,6 +305,8 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
           dieselLevelType: 'none',
           dieselLevelStart: '',
           dieselLevelEnd: '',
+          dieselLevelStartCm: '',
+          dieselLevelEndCm: '',
           arlaOdometerStart: '',
           arlaOdometerEnd: '',
           arlaLevelType: 'none',
@@ -328,6 +335,17 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
     }));
   };
 
+  // Função para lidar com mudanças nos campos de CM do DIESEL
+  const handleDieselCmChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'start' | 'end') => {
+    const cmValue = e.target.value;
+    const volume = cmValue ? convertCmToVolume(cmValue) : null;
+    
+    setFormData(prev => ({
+      ...prev,
+      [`dieselLevel${type === 'start' ? 'Start' : 'End'}Cm`]: cmValue,
+      [`dieselLevel${type === 'start' ? 'Start' : 'End'}`]: volume ? volume.toString() : ''
+    }));
+  };
   const isDieselSelected = formData.fuelTypes.includes('DIESEL');
   const isArlaSelected = formData.fuelTypes.includes('ARLA');
 
@@ -505,33 +523,87 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
             {/* Campo de Nível baseado na seleção */}
             {formData.dieselLevelType === 'start' && (
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nível DIESEL Inicial
-                </label>
-                <input
-                  type="number"
-                  name="dieselLevelStart"
-                  value={formData.dieselLevelStart}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Nível inicial"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Medida em CM
+                    </label>
+                    <select
+                      name="dieselLevelStartCm"
+                      value={formData.dieselLevelStartCm}
+                      onChange={(e) => handleDieselCmChange(e, 'start')}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+                    >
+                      <option value="">Selecione a medida</option>
+                      {getCmOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Nível DIESEL Inicial (L)
+                    </label>
+                    <input
+                      type="number"
+                      name="dieselLevelStart"
+                      value={formData.dieselLevelStart}
+                      readOnly
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
+                      placeholder="Calculado automaticamente"
+                    />
+                    {formData.dieselLevelStartCm && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        {formData.dieselLevelStartCm} cm = {formData.dieselLevelStart}L
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             
             {formData.dieselLevelType === 'end' && (
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nível DIESEL Final
-                </label>
-                <input
-                  type="number"
-                  name="dieselLevelEnd"
-                  value={formData.dieselLevelEnd}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Nível final"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Medida em CM
+                    </label>
+                    <select
+                      name="dieselLevelEndCm"
+                      value={formData.dieselLevelEndCm}
+                      onChange={(e) => handleDieselCmChange(e, 'end')}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+                    >
+                      <option value="">Selecione a medida</option>
+                      {getCmOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Nível DIESEL Final (L)
+                    </label>
+                    <input
+                      type="number"
+                      name="dieselLevelEnd"
+                      value={formData.dieselLevelEnd}
+                      readOnly
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
+                      placeholder="Calculado automaticamente"
+                    />
+                    {formData.dieselLevelEndCm && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        {formData.dieselLevelEndCm} cm = {formData.dieselLevelEnd}L
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             
