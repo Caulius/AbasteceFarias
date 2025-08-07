@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Fuel, Gauge, Route, FileText, Calculator } from 'lucide-react';
 import type { FuelRecord, Responsible, Vehicle } from '../types';
 import { convertCmToVolume, getCmOptions } from '../utils/dieselLevelConverter';
+import { convertArlaLevelCmToVolume, getArlaCmOptions } from '../utils/arlaLevelConverter';
 
 interface FuelFormProps {
   responsibles: Responsible[];
@@ -26,6 +27,8 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
     arlaLevelType: 'none' as 'none' | 'start' | 'end',
     arlaLevelStart: '',
     arlaLevelEnd: '',
+    arlaLevelStartCm: '',
+    arlaLevelEndCm: '',
     dieselLevelStartCm: '',
     dieselLevelEndCm: '',
     dieselDailyType: 'none' as 'none' | 'start' | 'end',
@@ -139,6 +142,8 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
           arlaOdometerEnd: '',
           arlaLevelStart: '',
           arlaLevelEnd: '',
+          arlaLevelStartCm: '',
+          arlaLevelEndCm: '',
           arlaDailyStart: '',
           arlaDailyEnd: '',
           arlaTotalRefueled: ''
@@ -207,6 +212,8 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         arlaLevelType,
         arlaLevelStart: editingRecord.arlaLevelStart?.toString() || '',
         arlaLevelEnd: editingRecord.arlaLevelEnd?.toString() || '',
+        arlaLevelStartCm: '',
+        arlaLevelEndCm: '',
         dieselLevelStartCm: '',
         dieselLevelEndCm: '',
         dieselDailyType,
@@ -312,6 +319,8 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
           arlaLevelType: 'none',
           arlaLevelStart: '',
           arlaLevelEnd: '',
+          arlaLevelStartCm: '',
+          arlaLevelEndCm: '',
           dieselDailyType: 'none',
           dieselDailyStart: '',
           dieselDailyEnd: '',
@@ -327,6 +336,17 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
       }
   };
 
+  // Função para lidar com mudanças nos campos de CM do ARLA
+  const handleArlaCmChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'start' | 'end') => {
+    const cmValue = e.target.value;
+    const volume = cmValue ? convertArlaLevelCmToVolume(cmValue) : null;
+    
+    setFormData(prev => ({
+      ...prev,
+      [`arlaLevel${type === 'start' ? 'Start' : 'End'}Cm`]: cmValue,
+      [`arlaLevel${type === 'start' ? 'Start' : 'End'}`]: volume ? volume.toString() : ''
+    }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -770,33 +790,87 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
             {/* Campo de Nível baseado na seleção */}
             {formData.arlaLevelType === 'start' && (
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nível ARLA Inicial
-                </label>
-                <input
-                  type="number"
-                  name="arlaLevelStart"
-                  value={formData.arlaLevelStart}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Nível inicial"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Medida em CM
+                    </label>
+                    <select
+                      name="arlaLevelStartCm"
+                      value={formData.arlaLevelStartCm}
+                      onChange={(e) => handleArlaCmChange(e, 'start')}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+                    >
+                      <option value="">Selecione a medida</option>
+                      {getArlaCmOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Nível ARLA Inicial (L)
+                    </label>
+                    <input
+                      type="number"
+                      name="arlaLevelStart"
+                      value={formData.arlaLevelStart}
+                      readOnly
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
+                      placeholder="Calculado automaticamente"
+                    />
+                    {formData.arlaLevelStartCm && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        {formData.arlaLevelStartCm} cm = {formData.arlaLevelStart}L
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             
             {formData.arlaLevelType === 'end' && (
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nível ARLA Final
-                </label>
-                <input
-                  type="number"
-                  name="arlaLevelEnd"
-                  value={formData.arlaLevelEnd}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Nível final"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Medida em CM
+                    </label>
+                    <select
+                      name="arlaLevelEndCm"
+                      value={formData.arlaLevelEndCm}
+                      onChange={(e) => handleArlaCmChange(e, 'end')}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
+                    >
+                      <option value="">Selecione a medida</option>
+                      {getArlaCmOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Nível ARLA Final (L)
+                    </label>
+                    <input
+                      type="number"
+                      name="arlaLevelEnd"
+                      value={formData.arlaLevelEnd}
+                      readOnly
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
+                      placeholder="Calculado automaticamente"
+                    />
+                    {formData.arlaLevelEndCm && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        {formData.arlaLevelEndCm} cm = {formData.arlaLevelEnd}L
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             
