@@ -525,16 +525,6 @@ const FuelList: React.FC<FuelListProps> = ({
                         </div>
                         
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          {(record.dieselDailyStart || record.dieselDailyEnd) && (
-                            <div>
-                              <span className="text-gray-400">DIESEL:</span>
-                              <span className="text-orange-400 font-medium ml-1">
-                                {record.dieselDailyStart && `${record.dieselDailyStart}L início`}
-                                {record.dieselDailyStart && record.dieselDailyEnd && ' / '}
-                                {record.dieselDailyEnd && `${record.dieselDailyEnd}L final`}
-                              </span>
-                            </div>
-                          )}
                           {record.dieselTotalRefueled && (
                             <div>
                               <span className="text-gray-400">Abastecido:</span>
@@ -544,16 +534,6 @@ const FuelList: React.FC<FuelListProps> = ({
                                   Bomba: {record.dieselPumpTotal}L
                                 </div>
                               )}
-                            </div>
-                          )}
-                          {(record.arlaDailyStart || record.arlaDailyEnd) && (
-                            <div>
-                              <span className="text-gray-400">ARLA:</span>
-                              <span className="text-green-400 font-medium ml-1">
-                                {record.arlaDailyStart && `${record.arlaDailyStart}L início`}
-                                {record.arlaDailyStart && record.arlaDailyEnd && ' / '}
-                                {record.arlaDailyEnd && `${record.arlaDailyEnd}L final`}
-                              </span>
                             </div>
                           )}
                           {record.arlaTotalRefueled && (
