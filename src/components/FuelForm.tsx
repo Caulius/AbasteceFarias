@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Fuel, Gauge, Route, FileText, Calculator } from 'lucide-react';
 import type { FuelRecord, Responsible, Vehicle } from '../types';
 import { convertCmToVolume, getCmOptions } from '../utils/dieselLevelConverter';
-import { convertArlaLevelCmToVolume, getArlaCmOptions } from '../utils/arlaLevelConverter';
 
 interface FuelFormProps {
   responsibles: Responsible[];
@@ -27,17 +26,9 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
     arlaLevelType: 'none' as 'none' | 'start' | 'end',
     arlaLevelStart: '',
     arlaLevelEnd: '',
-    arlaLevelStartCm: '',
-    arlaLevelEndCm: '',
     dieselLevelStartCm: '',
     dieselLevelEndCm: '',
-    dieselDailyType: 'none' as 'none' | 'start' | 'end',
-    dieselDailyStart: '',
-    dieselDailyEnd: '',
     dieselTotalRefueled: '',
-    arlaDailyType: 'none' as 'none' | 'start' | 'end',
-    arlaDailyStart: '',
-    arlaDailyEnd: '',
     arlaTotalRefueled: '',
     vehicleKm: '',
     averagePanel: '',
@@ -133,8 +124,6 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
           dieselOdometerEnd: '',
           dieselLevelStart: '',
           dieselLevelEnd: '',
-          dieselDailyStart: '',
-          dieselDailyEnd: '',
           dieselTotalRefueled: ''
         }),
         ...(fuelType === 'ARLA' && {
@@ -142,10 +131,6 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
           arlaOdometerEnd: '',
           arlaLevelStart: '',
           arlaLevelEnd: '',
-          arlaLevelStartCm: '',
-          arlaLevelEndCm: '',
-          arlaDailyStart: '',
-          arlaDailyEnd: '',
           arlaTotalRefueled: ''
         })
       }));
@@ -188,16 +173,6 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
       if (editingRecord.arlaLevelStart !== undefined) arlaLevelType = 'start';
       if (editingRecord.arlaLevelEnd !== undefined) arlaLevelType = 'end';
       
-      // Determinar tipo diário diesel
-      let dieselDailyType: 'none' | 'start' | 'end' = 'none';
-      if (editingRecord.dieselDailyStart !== undefined) dieselDailyType = 'start';
-      if (editingRecord.dieselDailyEnd !== undefined) dieselDailyType = 'end';
-      
-      // Determinar tipo diário arla
-      let arlaDailyType: 'none' | 'start' | 'end' = 'none';
-      if (editingRecord.arlaDailyStart !== undefined) arlaDailyType = 'start';
-      if (editingRecord.arlaDailyEnd !== undefined) arlaDailyType = 'end';
-      
       setFormData({
         responsibleId: editingRecord.responsibleId,
         vehicleId: editingRecord.vehicleId,
@@ -212,17 +187,9 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         arlaLevelType,
         arlaLevelStart: editingRecord.arlaLevelStart?.toString() || '',
         arlaLevelEnd: editingRecord.arlaLevelEnd?.toString() || '',
-        arlaLevelStartCm: '',
-        arlaLevelEndCm: '',
         dieselLevelStartCm: '',
         dieselLevelEndCm: '',
-        dieselDailyType,
-        dieselDailyStart: editingRecord.dieselDailyStart?.toString() || '',
-        dieselDailyEnd: editingRecord.dieselDailyEnd?.toString() || '',
         dieselTotalRefueled: editingRecord.dieselTotalRefueled?.toString() || '',
-        arlaDailyType,
-        arlaDailyStart: editingRecord.arlaDailyStart?.toString() || '',
-        arlaDailyEnd: editingRecord.arlaDailyEnd?.toString() || '',
         arlaTotalRefueled: editingRecord.arlaTotalRefueled?.toString() || '',
         vehicleKm: editingRecord.vehicleKm?.toString() || '',
         averagePanel: editingRecord.averagePanel?.toString() || '',
@@ -280,8 +247,6 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         ...(isDieselSelected && formData.dieselOdometerEnd && { dieselOdometerEnd: Number(formData.dieselOdometerEnd) }),
         ...(isDieselSelected && formData.dieselLevelType === 'start' && formData.dieselLevelStart && { dieselLevelStart: Number(formData.dieselLevelStart) }),
         ...(isDieselSelected && formData.dieselLevelType === 'end' && formData.dieselLevelEnd && { dieselLevelEnd: Number(formData.dieselLevelEnd) }),
-        ...(isDieselSelected && formData.dieselDailyType === 'start' && formData.dieselDailyStart && { dieselDailyStart: Number(formData.dieselDailyStart) }),
-        ...(isDieselSelected && formData.dieselDailyType === 'end' && formData.dieselDailyEnd && { dieselDailyEnd: Number(formData.dieselDailyEnd) }),
         ...(isDieselSelected && formData.dieselTotalRefueled && { dieselTotalRefueled: Number(formData.dieselTotalRefueled) }),
         ...(isDieselSelected && calculatedDieselPumpTotal !== null && { dieselPumpTotal: Number(calculatedDieselPumpTotal.toFixed(2)) }),
         // Campos ARLA
@@ -289,8 +254,6 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
         ...(isArlaSelected && formData.arlaOdometerEnd && { arlaOdometerEnd: Number(formData.arlaOdometerEnd) }),
         ...(isArlaSelected && formData.arlaLevelType === 'start' && formData.arlaLevelStart && { arlaLevelStart: Number(formData.arlaLevelStart) }),
         ...(isArlaSelected && formData.arlaLevelType === 'end' && formData.arlaLevelEnd && { arlaLevelEnd: Number(formData.arlaLevelEnd) }),
-        ...(isArlaSelected && formData.arlaDailyType === 'start' && formData.arlaDailyStart && { arlaDailyStart: Number(formData.arlaDailyStart) }),
-        ...(isArlaSelected && formData.arlaDailyType === 'end' && formData.arlaDailyEnd && { arlaDailyEnd: Number(formData.arlaDailyEnd) }),
         ...(isArlaSelected && formData.arlaTotalRefueled && { arlaTotalRefueled: Number(formData.arlaTotalRefueled) }),
         ...(isArlaSelected && calculatedArlaPumpTotal !== null && { arlaPumpTotal: Number(calculatedArlaPumpTotal.toFixed(2)) }),
         // Campos gerais
@@ -319,15 +282,7 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
           arlaLevelType: 'none',
           arlaLevelStart: '',
           arlaLevelEnd: '',
-          arlaLevelStartCm: '',
-          arlaLevelEndCm: '',
-          dieselDailyType: 'none',
-          dieselDailyStart: '',
-          dieselDailyEnd: '',
           dieselTotalRefueled: '',
-          arlaDailyType: 'none',
-          arlaDailyStart: '',
-          arlaDailyEnd: '',
           arlaTotalRefueled: '',
           vehicleKm: '',
           averagePanel: '',
@@ -336,17 +291,6 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
       }
   };
 
-  // Função para lidar com mudanças nos campos de CM do ARLA
-  const handleArlaCmChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'start' | 'end') => {
-    const cmValue = e.target.value;
-    const volume = cmValue ? convertArlaLevelCmToVolume(cmValue) : null;
-    
-    setFormData(prev => ({
-      ...prev,
-      [`arlaLevel${type === 'start' ? 'Start' : 'End'}Cm`]: cmValue,
-      [`arlaLevel${type === 'start' ? 'Start' : 'End'}`]: volume ? volume.toString() : ''
-    }));
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -627,59 +571,6 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
               </div>
             )}
             
-            {/* Campos de Total Diário */}
-            {/* Seletor de Tipo Diário */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Total DIESEL Diário (Opcional)
-              </label>
-              <select
-                name="dieselDailyType"
-                value={formData.dieselDailyType}
-                onChange={handleChange}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white mb-3"
-              >
-                <option value="none">Não informar total diário</option>
-                <option value="start">Total início do dia</option>
-                <option value="end">Total final do dia</option>
-              </select>
-            </div>
-            
-            {/* Campo Diário baseado na seleção */}
-            {formData.dieselDailyType === 'start' && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  DIESEL Início do Dia (L)
-                </label>
-                <input
-                  type="number"
-                  name="dieselDailyStart"
-                  value={formData.dieselDailyStart}
-                  onChange={handleChange}
-                  step="0.01"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Total disponível no início do dia"
-                />
-              </div>
-            )}
-            
-            {formData.dieselDailyType === 'end' && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  DIESEL Final do Dia (L)
-                </label>
-                <input
-                  type="number"
-                  name="dieselDailyEnd"
-                  value={formData.dieselDailyEnd}
-                  onChange={handleChange}
-                  step="0.01"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Total disponível no final do dia"
-                />
-              </div>
-            )}
-            
             {/* Campo Total Abastecido */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -790,139 +681,32 @@ const FuelForm: React.FC<FuelFormProps> = ({ responsibles, vehicles, fuelRecords
             {/* Campo de Nível baseado na seleção */}
             {formData.arlaLevelType === 'start' && (
               <div className="md:col-span-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Medida em CM
-                    </label>
-                    <select
-                      name="arlaLevelStartCm"
-                      value={formData.arlaLevelStartCm}
-                      onChange={(e) => handleArlaCmChange(e, 'start')}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
-                    >
-                      <option value="">Selecione a medida</option>
-                      {getArlaCmOptions().map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Nível ARLA Inicial (L)
-                    </label>
-                    <input
-                      type="number"
-                      name="arlaLevelStart"
-                      value={formData.arlaLevelStart}
-                      readOnly
-                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
-                      placeholder="Calculado automaticamente"
-                    />
-                    {formData.arlaLevelStartCm && (
-                      <div className="mt-1 text-xs text-gray-400">
-                        {formData.arlaLevelStartCm} cm = {formData.arlaLevelStart}L
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Nível ARLA Inicial
+                </label>
+                <input
+                  type="number"
+                  name="arlaLevelStart"
+                  value={formData.arlaLevelStart}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
+                  placeholder="Nível inicial"
+                />
               </div>
             )}
             
             {formData.arlaLevelType === 'end' && (
               <div className="md:col-span-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Medida em CM
-                    </label>
-                    <select
-                      name="arlaLevelEndCm"
-                      value={formData.arlaLevelEndCm}
-                      onChange={(e) => handleArlaCmChange(e, 'end')}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white"
-                    >
-                      <option value="">Selecione a medida</option>
-                      {getArlaCmOptions().map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Nível ARLA Final (L)
-                    </label>
-                    <input
-                      type="number"
-                      name="arlaLevelEnd"
-                      value={formData.arlaLevelEnd}
-                      readOnly
-                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white cursor-not-allowed"
-                      placeholder="Calculado automaticamente"
-                    />
-                    {formData.arlaLevelEndCm && (
-                      <div className="mt-1 text-xs text-gray-400">
-                        {formData.arlaLevelEndCm} cm = {formData.arlaLevelEnd}L
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Campos de Total Diário */}
-            {/* Seletor de Tipo Diário */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Total ARLA Diário (Opcional)
-              </label>
-              <select
-                name="arlaDailyType"
-                value={formData.arlaDailyType}
-                onChange={handleChange}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white mb-3"
-              >
-                <option value="none">Não informar total diário</option>
-                <option value="start">Total início do dia</option>
-                <option value="end">Total final do dia</option>
-              </select>
-            </div>
-            
-            {/* Campo Diário baseado na seleção */}
-            {formData.arlaDailyType === 'start' && (
-              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  ARLA Início do Dia (L)
+                  Nível ARLA Final
                 </label>
                 <input
                   type="number"
-                  name="arlaDailyStart"
-                  value={formData.arlaDailyStart}
+                  name="arlaLevelEnd"
+                  value={formData.arlaLevelEnd}
                   onChange={handleChange}
-                  step="0.01"
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Total disponível no início do dia"
-                />
-              </div>
-            )}
-            
-            {formData.arlaDailyType === 'end' && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  ARLA Final do Dia (L)
-                </label>
-                <input
-                  type="number"
-                  name="arlaDailyEnd"
-                  value={formData.arlaDailyEnd}
-                  onChange={handleChange}
-                  step="0.01"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-white placeholder-gray-400"
-                  placeholder="Total disponível no final do dia"
+                  placeholder="Nível final"
                 />
               </div>
             )}
