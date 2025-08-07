@@ -141,19 +141,7 @@ const FuelModal: React.FC<FuelModalProps> = ({ record, responsible, vehicle, isO
                 {record.dieselLevelEnd && (
                   <div>
                     <p className="text-gray-400 text-sm">Nível Final</p>
-                    <p className="text-white font-medium">{record.dieselLevelEnd}</p>
-                  </div>
-                )}
-                {record.dieselDailyStart && (
-                  <div>
-                    <p className="text-gray-400 text-sm">DIESEL Início do Dia</p>
-                    <p className="text-orange-400 font-medium">{record.dieselDailyStart}L</p>
-                  </div>
-                )}
-                {record.dieselDailyEnd && (
-                  <div>
-                    <p className="text-gray-400 text-sm">DIESEL Final do Dia</p>
-                    <p className="text-orange-400 font-medium">{record.dieselDailyEnd}L</p>
+                    <p className="text-white font-medium">{record.dieselLevelEnd}L</p>
                   </div>
                 )}
                 {record.dieselTotalRefueled && (
@@ -194,19 +182,7 @@ const FuelModal: React.FC<FuelModalProps> = ({ record, responsible, vehicle, isO
                 {record.arlaLevelEnd && (
                   <div>
                     <p className="text-gray-400 text-sm">Nível Final</p>
-                    <p className="text-white font-medium">{record.arlaLevelEnd}</p>
-                  </div>
-                )}
-                {record.arlaDailyStart && (
-                  <div>
-                    <p className="text-gray-400 text-sm">ARLA Início do Dia</p>
-                    <p className="text-green-400 font-medium">{record.arlaDailyStart}L</p>
-                  </div>
-                )}
-                {record.arlaDailyEnd && (
-                  <div>
-                    <p className="text-gray-400 text-sm">ARLA Final do Dia</p>
-                    <p className="text-green-400 font-medium">{record.arlaDailyEnd}L</p>
+                    <p className="text-white font-medium">{record.arlaLevelEnd}L</p>
                   </div>
                 )}
                 {record.arlaTotalRefueled && (
