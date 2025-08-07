@@ -79,16 +79,16 @@ const Dashboard: React.FC<DashboardProps> = ({
     const totalDieselRefueled = filteredRecords.reduce((sum, r) => sum + (r.dieselTotalRefueled || 0), 0);
     const totalArlaRefueled = filteredRecords.reduce((sum, r) => sum + (r.arlaTotalRefueled || 0), 0);
     
-    const lastDieselDaily = filteredRecords
-      .filter(r => r.dieselDailyEnd || r.dieselDailyStart)
+    const lastDieselLevel = filteredRecords
+      .filter(r => r.dieselLevelEnd)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
     
-    const lastArlaDaily = filteredRecords
-      .filter(r => r.arlaDailyEnd || r.arlaDailyStart)
+    const lastArlaLevel = filteredRecords
+      .filter(r => r.arlaLevelEnd)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
     
-    const currentDieselLevel = lastDieselDaily ? (lastDieselDaily.dieselDailyEnd || lastDieselDaily.dieselDailyStart || 0) : 0;
-    const currentArlaLevel = lastArlaDaily ? (lastArlaDaily.arlaDailyEnd || lastArlaDaily.arlaDailyStart || 0) : 0;
+    const currentDieselLevel = lastDieselLevel ? (lastDieselLevel.dieselLevelEnd || 0) : 0;
+    const currentArlaLevel = lastArlaLevel ? (lastArlaLevel.arlaLevelEnd || 0) : 0;
     
     const avgConsumption = filteredRecords.length > 0 
       ? filteredRecords.reduce((sum, r) => sum + (r.average || 0), 0) / filteredRecords.length 
