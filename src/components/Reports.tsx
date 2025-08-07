@@ -73,16 +73,17 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
     })}`, 20, 30);
     
     // Resumo
-    const totalDieselDaily = records.reduce((sum, r) => {
-      const dailyStart = r.dieselDailyStart || 0;
-      const dailyEnd = r.dieselDailyEnd || 0;
-      return sum + Math.max(dailyStart, dailyEnd);
-    }, 0);
-    const totalArlaDaily = records.reduce((sum, r) => {
-      const dailyStart = r.arlaDailyStart || 0;
-      const dailyEnd = r.arlaDailyEnd || 0;
-      return sum + Math.max(dailyStart, dailyEnd);
-    }, 0);
+    const lastDieselLevel = records
+      .filter(r => r.dieselLevelEnd)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    
+    const lastArlaLevel = records
+      .filter(r => r.arlaLevelEnd)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    
+    const currentDieselLevel = lastDieselLevel ? lastDieselLevel.dieselLevelEnd || 0 : 0;
+    const currentArlaLevel = lastArlaLevel ? lastArlaLevel.arlaLevelEnd || 0 : 0;
+    
     const totalDieselRefueled = records.reduce((sum, r) => sum + (r.dieselTotalRefueled || 0), 0);
     const totalArlaRefueled = records.reduce((sum, r) => sum + (r.arlaTotalRefueled || 0), 0);
     const avgConsumption = records.length > 0 
@@ -90,8 +91,8 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
       : 0;
 
     doc.text(`Total de Abastecimentos: ${records.length}`, 20, 45);
-    doc.text(`Último Nível DIESEL: ${totalDieselDaily.toFixed(2)} L`, 20, 52);
-    doc.text(`Último Nível ARLA: ${totalArlaDaily.toFixed(2)} L`, 20, 59);
+    doc.text(`Último Nível DIESEL: ${currentDieselLevel.toFixed(2)} L`, 20, 52);
+    doc.text(`Último Nível ARLA: ${currentArlaLevel.toFixed(2)} L`, 20, 59);
     doc.text(`Total DIESEL Abastecido: ${totalDieselRefueled.toFixed(2)} L`, 20, 66);
     doc.text(`Total ARLA Abastecido: ${totalArlaRefueled.toFixed(2)} L`, 20, 73);
     doc.text(`Média de Consumo: ${avgConsumption.toFixed(2)} km/l`, 20, 80);
@@ -115,10 +116,8 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
           `${vehicle?.plate} - ${vehicle?.model}`,
           record.fuelTypes.join(', '),
           record.status,
-          record.dieselDailyStart || record.dieselDailyEnd ? 
-            `${record.dieselDailyStart || 0}L → ${record.dieselDailyEnd || 0}L` : '-',
-          record.arlaDailyStart || record.arlaDailyEnd ? 
-            `${record.arlaDailyStart || 0}L → ${record.arlaDailyEnd || 0}L` : '-',
+          record.dieselLevelEnd ? `${record.dieselLevelEnd}L` : '-',
+          record.arlaLevelEnd ? `${record.arlaLevelEnd}L` : '-',
           `D:${record.dieselTotalRefueled || 0}L A:${record.arlaTotalRefueled || 0}L`,
           record.vehicleKm || '-',
           record.average ? `${record.average} km/l` : '-',
@@ -128,7 +127,7 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
       });
 
       autoTable(doc, {
-        head: [['Data/Hora', 'Responsável', 'Veículo', 'Tipos', 'Status', 'DIESEL Diário', 'ARLA Diário', 'Abastecido', 'KM', 'Média', 'Média Painel', 'Observações']],
+        head: [['Data/Hora', 'Responsável', 'Veículo', 'Tipos', 'Status', 'DIESEL Nível', 'ARLA Nível', 'Abastecido', 'KM', 'Média', 'Média Painel', 'Observações']],
         body: tableData,
         startY: 87,
         styles: { fontSize: 8 },
@@ -156,16 +155,17 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
         })();
 
     // Dados do resumo
-    const totalDieselDaily = records.reduce((sum, r) => {
-      const dailyStart = r.dieselDailyStart || 0;
-      const dailyEnd = r.dieselDailyEnd || 0;
-      return sum + Math.max(dailyStart, dailyEnd);
-    }, 0);
-    const totalArlaDaily = records.reduce((sum, r) => {
-      const dailyStart = r.arlaDailyStart || 0;
-      const dailyEnd = r.arlaDailyEnd || 0;
-      return sum + Math.max(dailyStart, dailyEnd);
-    }, 0);
+    const lastDieselLevel = records
+      .filter(r => r.dieselLevelEnd)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    
+    const lastArlaLevel = records
+      .filter(r => r.arlaLevelEnd)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    
+    const currentDieselLevel = lastDieselLevel ? lastDieselLevel.dieselLevelEnd || 0 : 0;
+    const currentArlaLevel = lastArlaLevel ? lastArlaLevel.arlaLevelEnd || 0 : 0;
+    
     const totalDieselRefueled = records.reduce((sum, r) => sum + (r.dieselTotalRefueled || 0), 0);
     const totalArlaRefueled = records.reduce((sum, r) => sum + (r.arlaTotalRefueled || 0), 0);
     const avgConsumption = records.length > 0 
@@ -187,8 +187,8 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
       [''],
       ['RESUMO GERAL'],
       ['Total de Abastecimentos', records.length],
-      ['Último Nível DIESEL (L)', totalDieselDaily.toFixed(2)],
-      ['Último Nível ARLA (L)', totalArlaDaily.toFixed(2)],
+      ['Último Nível DIESEL (L)', currentDieselLevel.toFixed(2)],
+      ['Último Nível ARLA (L)', currentArlaLevel.toFixed(2)],
       ['Total DIESEL Abastecido (L)', totalDieselRefueled.toFixed(2)],
       ['Total ARLA Abastecido (L)', totalArlaRefueled.toFixed(2)],
       ['Média de Consumo (km/l)', avgConsumption.toFixed(2)]
@@ -201,11 +201,9 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
         'Tipos Combustível', 'Status',
         'DIESEL - Hodômetro Inicial', 'DIESEL - Hodômetro Final',
         'DIESEL - Nível Inicial', 'DIESEL - Nível Final',
-        'DIESEL - Total Início Dia (L)', 'DIESEL - Total Final Dia (L)',
         'DIESEL - Total Abastecido (L)',
         'ARLA - Hodômetro Inicial', 'ARLA - Hodômetro Final',
         'ARLA - Nível Inicial', 'ARLA - Nível Final',
-        'ARLA - Total Início Dia (L)', 'ARLA - Total Final Dia (L)',
         'ARLA - Total Abastecido (L)',
         'KM do Veículo', 'Média Consumo (km/l)', 'Média Painel (km/l)', 'Observações'
       ]
@@ -245,16 +243,12 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
         record.dieselOdometerEnd || '',
         record.dieselLevelStart || '',
         record.dieselLevelEnd || '',
-        record.dieselDailyStart || '',
-        record.dieselDailyEnd || '',
         record.dieselTotalRefueled || '',
         // ARLA - Dados completos
         record.arlaOdometerStart || '',
         record.arlaOdometerEnd || '',
         record.arlaLevelStart || '',
         record.arlaLevelEnd || '',
-        record.arlaDailyStart || '',
-        record.arlaDailyEnd || '',
         record.arlaTotalRefueled || '',
         // Dados gerais
         record.vehicleKm || '',
@@ -386,16 +380,17 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
       reportContent += 'Nenhum abastecimento encontrado para o período selecionado.\n';
     } else {
       // Resumo
-      const totalDieselDaily = records.reduce((sum, r) => {
-        const dailyStart = r.dieselDailyStart || 0;
-        const dailyEnd = r.dieselDailyEnd || 0;
-        return sum + Math.max(dailyStart, dailyEnd);
-      }, 0);
-      const totalArlaDaily = records.reduce((sum, r) => {
-        const dailyStart = r.arlaDailyStart || 0;
-        const dailyEnd = r.arlaDailyEnd || 0;
-        return sum + Math.max(dailyStart, dailyEnd);
-      }, 0);
+      const lastDieselLevel = records
+        .filter(r => r.dieselLevelEnd)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      
+      const lastArlaLevel = records
+        .filter(r => r.arlaLevelEnd)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      
+      const currentDieselLevel = lastDieselLevel ? lastDieselLevel.dieselLevelEnd || 0 : 0;
+      const currentArlaLevel = lastArlaLevel ? lastArlaLevel.arlaLevelEnd || 0 : 0;
+      
       const totalDieselRefueled = records.reduce((sum, r) => sum + (r.dieselTotalRefueled || 0), 0);
       const totalArlaRefueled = records.reduce((sum, r) => sum + (r.arlaTotalRefueled || 0), 0);
       const avgConsumption = records.length > 0 
@@ -404,8 +399,8 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
 
       reportContent += `RESUMO GERAL:\n`;
       reportContent += `Total de Abastecimentos: ${records.length}\n`;
-      reportContent += `Último Nível DIESEL: ${totalDieselDaily.toFixed(2)} L\n`;
-      reportContent += `Último Nível ARLA: ${totalArlaDaily.toFixed(2)} L\n`;
+      reportContent += `Último Nível DIESEL: ${currentDieselLevel.toFixed(2)} L\n`;
+      reportContent += `Último Nível ARLA: ${currentArlaLevel.toFixed(2)} L\n`;
       reportContent += `Total DIESEL Abastecido: ${totalDieselRefueled.toFixed(2)} L\n`;
       reportContent += `Total ARLA Abastecido: ${totalArlaRefueled.toFixed(2)} L\n`;
       reportContent += `Média de Consumo: ${avgConsumption.toFixed(2)} km/l\n\n`;
@@ -447,8 +442,6 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
           if (record.dieselOdometerEnd) reportContent += `     Hodômetro Final: ${record.dieselOdometerEnd}\n`;
           if (record.dieselLevelStart) reportContent += `     Nível Inicial: ${record.dieselLevelStart}\n`;
           if (record.dieselLevelEnd) reportContent += `     Nível Final: ${record.dieselLevelEnd}\n`;
-          if (record.dieselDailyStart) reportContent += `     Total Início do Dia: ${record.dieselDailyStart} L\n`;
-          if (record.dieselDailyEnd) reportContent += `     Total Final do Dia: ${record.dieselDailyEnd} L\n`;
           if (record.dieselTotalRefueled) reportContent += `     Total Abastecido: ${record.dieselTotalRefueled} L\n`;
         }
         
@@ -458,8 +451,6 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
           if (record.arlaOdometerEnd) reportContent += `     Hodômetro Final: ${record.arlaOdometerEnd}\n`;
           if (record.arlaLevelStart) reportContent += `     Nível Inicial: ${record.arlaLevelStart}\n`;
           if (record.arlaLevelEnd) reportContent += `     Nível Final: ${record.arlaLevelEnd}\n`;
-          if (record.arlaDailyStart) reportContent += `     Total Início do Dia: ${record.arlaDailyStart} L\n`;
-          if (record.arlaDailyEnd) reportContent += `     Total Final do Dia: ${record.arlaDailyEnd} L\n`;
           if (record.arlaTotalRefueled) reportContent += `     Total Abastecido: ${record.arlaTotalRefueled} L\n`;
         }
         
@@ -485,18 +476,22 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
 
   const getReportStats = () => {
     const records = filteredRecords;
+    
+    const lastDieselLevel = records
+      .filter(r => r.dieselLevelEnd)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    
+    const lastArlaLevel = records
+      .filter(r => r.arlaLevelEnd)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    
+    const currentDieselLevel = lastDieselLevel ? lastDieselLevel.dieselLevelEnd || 0 : 0;
+    const currentArlaLevel = lastArlaLevel ? lastArlaLevel.arlaLevelEnd || 0 : 0;
+    
     return {
       totalRecords: records.length,
-      totalDieselDaily: records.reduce((sum, r) => {
-        const dailyStart = r.dieselDailyStart || 0;
-        const dailyEnd = r.dieselDailyEnd || 0;
-        return sum + Math.max(dailyStart, dailyEnd);
-      }, 0),
-      totalArlaDaily: records.reduce((sum, r) => {
-        const dailyStart = r.arlaDailyStart || 0;
-        const dailyEnd = r.arlaDailyEnd || 0;
-        return sum + Math.max(dailyStart, dailyEnd);
-      }, 0),
+      currentDieselLevel,
+      currentArlaLevel,
       totalDieselRefueled: records.reduce((sum, r) => sum + (r.dieselTotalRefueled || 0), 0),
       totalArlaRefueled: records.reduce((sum, r) => sum + (r.arlaTotalRefueled || 0), 0),
       avgConsumption: records.length > 0 
@@ -602,8 +597,8 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
             <div className="flex items-center">
               <Fuel className="h-5 w-5 text-orange-400 mr-2" />
               <div>
-                <p className="text-sm text-orange-400 font-medium">DIESEL Diário</p>
-                <p className="text-xl font-bold text-white">{stats.totalDieselDaily.toFixed(1)}L</p>
+                <p className="text-sm text-orange-400 font-medium">DIESEL Nível</p>
+                <p className="text-xl font-bold text-white">{stats.currentDieselLevel.toFixed(1)}L</p>
               </div>
             </div>
           </div>
@@ -612,8 +607,8 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
             <div className="flex items-center">
               <Fuel className="h-5 w-5 text-green-400 mr-2" />
               <div>
-                <p className="text-sm text-green-400 font-medium">ARLA Diário</p>
-                <p className="text-xl font-bold text-white">{stats.totalArlaDaily.toFixed(1)}L</p>
+                <p className="text-sm text-green-400 font-medium">ARLA Nível</p>
+                <p className="text-xl font-bold text-white">{stats.currentArlaLevel.toFixed(1)}L</p>
               </div>
             </div>
           </div>
@@ -718,25 +713,17 @@ const Reports: React.FC<ReportsProps> = ({ fuelRecords, responsibles, vehicles }
                         )}
                       </div>
                       <div className="text-right ml-4">
-                        {(record.dieselDailyStart || record.dieselDailyEnd) && (
-                          <p className="text-sm text-orange-400 font-medium">
-                            DIESEL: {record.dieselDailyStart && `${record.dieselDailyStart}L`}
-                            {record.dieselDailyStart && record.dieselDailyEnd && ' → '}
-                            {record.dieselDailyEnd && `${record.dieselDailyEnd}L`}
-                          </p>
-                        )}
                         {record.dieselTotalRefueled && (
                           <div>
                             <span className="text-gray-400">Abastecido:</span>
                             <span className="text-orange-400 font-medium ml-1">{record.dieselTotalRefueled}L</span>
                           </div>
                         )}
-                        {(record.arlaDailyStart || record.arlaDailyEnd) && (
-                          <p className="text-sm text-green-400 font-medium">
-                            ARLA: {record.arlaDailyStart && `${record.arlaDailyStart}L`}
-                            {record.arlaDailyStart && record.arlaDailyEnd && ' → '}
-                            {record.arlaDailyEnd && `${record.arlaDailyEnd}L`}
-                          </p>
+                        {record.arlaTotalRefueled && (
+                          <div>
+                            <span className="text-gray-400">Abastecido:</span>
+                            <span className="text-green-400 font-medium ml-1">{record.arlaTotalRefueled}L</span>
+                          </div>
                         )}
                         {record.average && (
                           <p className="text-sm text-purple-400 font-medium">
