@@ -12,17 +12,17 @@ export const arlaLevelTable: { [key: string]: number } = {
 };
 
 /**
- * Converte medida em centímetros para volume em litros - ARLA
+ * Converte medida em centímetros para volume em litros (ARLA)
  * @param cm - Medida em centímetros (formato: "1.50")
  * @returns Volume em litros ou null se não encontrado
  */
-export const convertArlaLevelCmToVolume = (cm: string): number | null => {
+export const convertArlaCmToVolume = (cm: string): number | null => {
   const normalizedCm = parseFloat(cm).toFixed(2);
   return arlaLevelTable[normalizedCm] || null;
 };
 
 /**
- * Busca o valor em CM mais próximo para um volume específico - ARLA
+ * Busca o valor em CM mais próximo para um volume específico (ARLA)
  * @param volume - Volume em litros
  * @returns Medida em CM ou null se não encontrado
  */
@@ -42,7 +42,7 @@ export const findClosestArlaCmForVolume = (volume: number): string | null => {
 };
 
 /**
- * Obtém todas as opções de CM disponíveis para um select - ARLA
+ * Obtém todas as opções de CM disponíveis para um select (ARLA)
  * @returns Array de opções ordenadas
  */
 export const getArlaCmOptions = (): Array<{ value: string; label: string }> => {
